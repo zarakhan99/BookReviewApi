@@ -77,6 +77,7 @@ namespace BookReviewApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(Review review)
         {
+            review.ReviewDate = DateTime.UtcNow; //Ensures the date and time are automatically created with a universal time  
             _context.Reviews.Add(review);
             await _context.SaveChangesAsync();
 
