@@ -11,47 +11,47 @@ namespace BookReviewApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MembersController : ControllerBase
+    public class BookGenresController : ControllerBase
     {
         private readonly ApplicationContext _context;
 
-        public MembersController(ApplicationContext context)
+        public BookGenresController(ApplicationContext context)
         {
             _context = context;
         }
 
-        // GET: api/Members
+        // GET: api/BookGenres
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Member>>> GetMembers()
+        public async Task<ActionResult<IEnumerable<BookGenre>>> GetBookGenres()
         {
-            return await _context.Members.ToListAsync();
+            return await _context.BookGenres.ToListAsync();
         }
 
-        // GET: api/Members/5
+        // GET: api/BookGenres/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Member>> GetMember(int id)
+        public async Task<ActionResult<BookGenre>> GetBookGenre(int id)
         {
-            var member = await _context.Members.FindAsync(id);
+            var bookGenre = await _context.BookGenres.FindAsync(id);
 
-            if (member == null)
+            if (bookGenre == null)
             {
                 return NotFound();
             }
 
-            return member;
+            return bookGenre;
         }
 
-        // PUT: api/Members/5
+        // PUT: api/BookGenres/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMember(int id, Member member)
+        public async Task<IActionResult> PutBookGenre(int id, BookGenre bookGenre)
         {
-            if (id != member.MemberId)
+            if (id != bookGenre.BookGenreId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(member).State = EntityState.Modified;
+            _context.Entry(bookGenre).State = EntityState.Modified;
 
             try
             {
@@ -59,7 +59,7 @@ namespace BookReviewApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MemberExists(id))
+                if (!BookGenreExists(id))
                 {
                     return NotFound();
                 }
@@ -72,36 +72,36 @@ namespace BookReviewApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Members
+        // POST: api/BookGenres
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Member>> PostMember(Member member)
+        public async Task<ActionResult<BookGenre>> PostBookGenre(BookGenre bookGenre)
         {
-            _context.Members.Add(member);
+            _context.BookGenres.Add(bookGenre);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMember", new { id = member.MemberId }, member);
+            return CreatedAtAction("GetBookGenre", new { id = bookGenre.BookGenreId }, bookGenre);
         }
 
-        // DELETE: api/Members/5
+        // DELETE: api/BookGenres/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMember(int id)
+        public async Task<IActionResult> DeleteBookGenre(int id)
         {
-            var member = await _context.Members.FindAsync(id);
-            if (member == null)
+            var bookGenre = await _context.BookGenres.FindAsync(id);
+            if (bookGenre == null)
             {
                 return NotFound();
             }
 
-            _context.Members.Remove(member);
+            _context.BookGenres.Remove(bookGenre);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool MemberExists(int id)
+        private bool BookGenreExists(int id)
         {
-            return _context.Members.Any(e => e.MemberId == id);
+            return _context.BookGenres.Any(e => e.BookGenreId == id);
         }
     }
 }
