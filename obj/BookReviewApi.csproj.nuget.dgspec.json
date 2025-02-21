@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Applications/software engineer masters/Web Applictation Development /BookReviewApi/BookReviewApi.csproj": {}
+    "/Applications/software engineer masters/Web Applictation Development/BookReviewApi/BookReviewApi.csproj": {}
   },
   "projects": {
-    "/Applications/software engineer masters/Web Applictation Development /BookReviewApi/BookReviewApi.csproj": {
+    "/Applications/software engineer masters/Web Applictation Development/BookReviewApi/BookReviewApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Applications/software engineer masters/Web Applictation Development /BookReviewApi/BookReviewApi.csproj",
+        "projectUniqueName": "/Applications/software engineer masters/Web Applictation Development/BookReviewApi/BookReviewApi.csproj",
         "projectName": "BookReviewApi",
-        "projectPath": "/Applications/software engineer masters/Web Applictation Development /BookReviewApi/BookReviewApi.csproj",
+        "projectPath": "/Applications/software engineer masters/Web Applictation Development/BookReviewApi/BookReviewApi.csproj",
         "packagesPath": "/Users/zara/.nuget/packages/",
-        "outputPath": "/Applications/software engineer masters/Web Applictation Development /BookReviewApi/obj/",
+        "outputPath": "/Applications/software engineer masters/Web Applictation Development/BookReviewApi/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/zara/.nuget/NuGet/NuGet.Config"
@@ -45,6 +45,10 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[9.0.1, )"

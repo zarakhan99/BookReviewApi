@@ -24,18 +24,14 @@ namespace BookReviewApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
         {
-            return await _context.Genres
-            .Include(g => g.Books) // Load related books for all genres 
-            .ToListAsync();
+            return await _context.Genres.ToListAsync();
         }
 
         // GET: api/Genres/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Genre>> GetGenre(int id)
         {
-            var genre = await _context.Genres
-            .Include(g => g.Books) // loads books associated with the genre id
-            .FirstOrDefaultAsync(g => g.GenreId == id);
+            var genre = await _context.Genres.FindAsync(id);
 
             if (genre == null)
             {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace BookReviewApi.Models
 {
@@ -9,8 +10,12 @@ namespace BookReviewApi.Models
         public string Author { get; set; }
         public int PublishYear { get; set; }
         public string BookDescription {get; set; }
-        public int GenreId { get; set; } // genre FK each book belongs to a genre 
+       
+       [JsonIgnore]
         public List<Review>? Reviews { get; set; } //For Navigational Proprties
+        
+        [JsonIgnore]
+        public List<BookGenre>? BookGenres { get; set; }
 
     }
 }
