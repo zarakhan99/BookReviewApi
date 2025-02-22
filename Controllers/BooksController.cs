@@ -40,6 +40,22 @@ namespace BookReviewApi.Controllers
 
             return book;
         }
+        
+        // GET: api/Books/ByGenre/{GenreId} 
+        // gets books by genre 
+        [HttpGet("ByGenre/{genreId}")]
+        public async Task<ActionResult<Book>> GetBookByGenre(int genreId)
+        {
+            var books = await _context.Books
+            .Where(b => b.BookGenres.Any(g => g.GenreId == genreId)) //checks which books are associated with the specific genre id
+            .ToListAsync();
+            
+            if (!books.Any())
+            {
+                return NotFound();
+            }
+            return Ok(books);
+        }
 
         // PUT: api/Books/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
