@@ -604,3 +604,6 @@
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/Microsoft.Extensions.Identity.Core.dll
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/Microsoft.Extensions.Identity.Stores.dll
+/Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/BouncyCastle.Cryptography.dll
+/Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/MailKit.dll
+/Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/MimeKit.dll
