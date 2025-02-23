@@ -607,3 +607,4 @@
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/BouncyCastle.Cryptography.dll
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/MailKit.dll
 /Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/MimeKit.dll
+/Applications/software engineer masters/Web Applictation Development/BookReviewApi/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
