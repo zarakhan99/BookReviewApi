@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims; 
 using BookReviewApi.Models;
 
 namespace BookReviewApi.Controllers
@@ -41,8 +43,22 @@ namespace BookReviewApi.Controllers
             return review;
         }
 
+        [HttpGet("ByBook/{bookId}")]
+        public async Task<ActionResult<Book>> GetReviewsForBook(int bookId)
+        {
+            var reviews = await _context.Reviews
+            .Where(r => r.BookId == bookId) //checks if reviews are associated with a specific book id
+            .ToListAsync();
+            
+            if (reviews.Count == 0) // if no reviews are found then a not found error is returned 
+            {
+                return NotFound();
+            }
+            return Ok(reviews); 
+        }
+
+        [Authorize]
         // PUT: api/Reviews/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReview(int id, Review review)
         {
@@ -50,6 +66,20 @@ namespace BookReviewApi.Controllers
             {
                 return BadRequest();
             }
+
+             var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+             var admin = User.IsInRole("Admin");
+             var owner = review.MemberId == appUser;
+
+             if(appUser == null)
+             {
+                return Unauthorized();
+             }
+
+             if (!admin && !owner)
+             {
+                return Forbid(); 
+             }
 
             _context.Entry(review).State = EntityState.Modified;
 
@@ -72,8 +102,8 @@ namespace BookReviewApi.Controllers
             return NoContent();
         }
 
+        [Authorize]
         // POST: api/Reviews
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(Review review)
         {
@@ -83,8 +113,10 @@ namespace BookReviewApi.Controllers
 
             return CreatedAtAction("GetReview", new { id = review.ReviewId }, review);
         }
-
-        // DELETE: api/Reviews/5
+        
+        
+        [Authorize]
+         // DELETE: api/Reviews/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {
@@ -93,6 +125,20 @@ namespace BookReviewApi.Controllers
             {
                 return NotFound();
             }
+
+             var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+             var admin = User.IsInRole("Admin");
+             var owner = review.MemberId == appUser;
+
+             if(appUser == null)
+             {
+                return Unauthorized();
+             }
+
+             if (!admin && !owner)
+             {
+                return Forbid(); 
+             }
 
             _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using BookReviewApi.Models;
 
 namespace BookReviewApi.Controllers
@@ -41,8 +42,8 @@ namespace BookReviewApi.Controllers
             return genre;
         }
 
+        [Authorize(Roles = "Admin")]
         // PUT: api/Genres/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
@@ -72,8 +73,8 @@ namespace BookReviewApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: api/Genres
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
@@ -83,6 +84,7 @@ namespace BookReviewApi.Controllers
             return CreatedAtAction("GetGenre", new { id = genre.GenreId }, genre);
         }
 
+        [Authorize(Roles = "Admin")]
         // DELETE: api/Genres/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
