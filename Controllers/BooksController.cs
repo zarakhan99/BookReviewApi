@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using BookReviewApi.Models;
 
 namespace BookReviewApi.Controllers
@@ -44,21 +45,21 @@ namespace BookReviewApi.Controllers
         // GET: api/Books/ByGenre/{GenreId} 
         // gets books by genre 
         [HttpGet("ByGenre/{genreId}")]
-        public async Task<ActionResult<Book>> GetBookByGenre(int genreId)
+        public async Task<ActionResult<IEnumerable<Book>>> GetBookByGenre(int genreId)
         {
             var books = await _context.Books
             .Where(b => b.BookGenres.Any(g => g.GenreId == genreId)) //checks which books are associated with the specific genre id
             .ToListAsync();
             
-            if (!books.Any())
+            if (books.Count == 0)
             {
                 return NotFound();
             }
             return Ok(books);
         }
 
+        [Authorize(Roles = "Admin")]
         // PUT: api/Books/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBook(int id, Book book)
         {
@@ -88,8 +89,8 @@ namespace BookReviewApi.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         // POST: api/Books
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Book>> PostBook(Book book)
         {
@@ -99,6 +100,7 @@ namespace BookReviewApi.Controllers
             return CreatedAtAction("GetBook", new { id = book.BookId }, book);
         }
 
+        [Authorize(Roles = "Admin")]
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
