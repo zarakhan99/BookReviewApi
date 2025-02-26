@@ -7,8 +7,9 @@ namespace BookReviewApi.Models
     public class Genre
     {
         public int GenreId { get; set; }
-
-        [Required]
+        
+        [Required] // Required fired and error message prinied out if genre name exceeds length
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Genre name must be be between 3 to 100 characters.")]
         public string GenreName { get; set; }
 
         [JsonIgnore]

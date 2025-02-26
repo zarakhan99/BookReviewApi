@@ -16,9 +16,9 @@ namespace BookReviewApi.Models
 
         [Required]
         public int PublishYear { get; set; }
-
+        
         [Required] // a book description is required and has a limit of 300 characters
-        [MaxLength(300, ErrorMessage = "Book description cannot exceed 300 characters.")]
+        [StringLength(300, MinimumLength = 100, ErrorMessage = "Book Description must be be between 100 to 300 characters.")]
         public string BookDescription {get; set; }
        
        // Navigational Properties
