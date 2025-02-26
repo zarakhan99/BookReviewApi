@@ -15,93 +15,148 @@ namespace BookReviewApi.Controllers
     [Authorize(Roles = "Admin")]
     public class BookGenresController : ControllerBase
     {
-        private readonly ApplicationContext _context;
+        private readonly IBookGenreService _bookGenreService; // genre service interface 
+        private readonly ILogger<BookGenresController> _logger; //logger service 
 
-        public BookGenresController(ApplicationContext context)
+        public BookGenresController(IBookGenreService bookGenreService, ILogger<BookGenresController> logger)
         {
-            _context = context;
+            _bookGenreService = bookGenreService;
+            _logger = logger;
         }
 
         // GET: api/BookGenres
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookGenre>>> GetBookGenres()
         {
-            return await _context.BookGenres.ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching all books."); 
+                var bookGenres = await _bookGenreService.GetBookGenresAsync(); // calls review service to get retrive all reviews
+                if (bookGenres == null || !bookGenres.Any()) // if no reviews exist it logs a warning and returns message
+                {
+                    _logger.LogWarning("No bookgenres found.");
+                    return NotFound("No bookgenres found.");
+                }
+                return Ok(bookGenres);
+            }
+            catch (Exception ex) // error handling logging a error if something goes wrong 
+            {
+                _logger.LogError(ex, "An error occurred while fetching book genres."); 
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
         // GET: api/BookGenres/5
         [HttpGet("{id}")]
         public async Task<ActionResult<BookGenre>> GetBookGenre(int id)
         {
-            var bookGenre = await _context.BookGenres.FindAsync(id);
-
-            if (bookGenre == null)
+            try
             {
-                return NotFound();
-            }
+                _logger.LogInformation($"Fetching BookGenre with ID {id}"); //starts the process 
+                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // retrives genres that matches id
 
-            return bookGenre;
+                if (bookGenre == null) // if it comes up empty a warning is logged and not found reposnse is displayed
+                {
+                    _logger.LogWarning($"Book genre with ID {id} not found.");
+                    return NotFound($"Book genre not found.");
+                }
+
+                return Ok(bookGenre); // otherwise returns genre 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching the bookgenre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
         // PUT: api/BookGenres/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutBookGenre(int id, BookGenre bookGenre)
         {
-            if (id != bookGenre.BookGenreId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(bookGenre).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                if (bookGenre == null)
+                {
+                    _logger.LogWarning("Received empty BookGenre object.");
+                    return BadRequest("BookGenre data cannot be null.");
+                }
+
+                if (id != bookGenre.BookGenreId) // checks if id matches 
+                {
+                    _logger.LogWarning("BookGenere ID mismatch."); // if id of the book id doesnt match a warning and bad request is displayed 
+                    return BadRequest("BookGenre ID mismatch.");
+                }
+
+                await _bookGenreService.UpdateBookGenreAsync(id, bookGenre); // updates book information
+                _logger.LogInformation($"BookGenre with ID {id} updated.");
+                return NoContent(); // returns no content as update was successful
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BookGenreExists(id))
+                if (await _bookGenreService.GetBookGenreByIdAsync(id) == null) // if it comes up empty a warning is logged and retunrs not found
                 {
-                    return NotFound();
+                    _logger.LogWarning($"BookGenre with ID {id} not found for update.");
+                    return NotFound($"BookGenre with ID {id} not found."); 
                 }
                 else
                 {
-                    throw;
+                    _logger.LogError("Error updating bookgenre."); 
+                    throw; // throws the exception again
                 }
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating the bookgenre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
         // POST: api/BookGenres
         [HttpPost]
         public async Task<ActionResult<BookGenre>> PostBookGenre(BookGenre bookGenre)
         {
-            _context.BookGenres.Add(bookGenre);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (bookGenre == null) // if object provided is null bad request is returned 
+                {
+                    _logger.LogWarning("Received empty BookGenre object.");
+                    return BadRequest("BookGenre data cannot be null.");
+                }
 
-            return CreatedAtAction("GetBookGenre", new { id = bookGenre.BookGenreId }, bookGenre);
+                await _bookGenreService.AddBookGenreAsync(bookGenre); // adds the genre to the database 
+                _logger.LogInformation($"BookGenre with ID {bookGenre.BookGenreId} created.");
+                return CreatedAtAction("GetBookGenre", new { id = bookGenre.BookGenreId }, bookGenre);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating the genre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
         // DELETE: api/BookGenres/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBookGenre(int id)
         {
-            var bookGenre = await _context.BookGenres.FindAsync(id);
-            if (bookGenre == null)
+            try
             {
-                return NotFound();
+                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // fecthded genre by id
+                if (bookGenre == null)
+                {
+                    _logger.LogWarning($"BookGenre with ID {id} not found.");
+                    return NotFound($"BookGenre with ID {id} not found."); 
+                }
+
+                await _bookGenreService.DeleteBookGenreAsync(id); // if found genre with the id is deleted from database 
+                _logger.LogInformation($"BookGenre with ID {id} deleted.");
+                return NoContent(); // returns no content as deletion was successful
             }
-
-            _context.BookGenres.Remove(bookGenre);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool BookGenreExists(int id)
-        {
-            return _context.BookGenres.Any(e => e.BookGenreId == id);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the BookGenre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
     }
 }

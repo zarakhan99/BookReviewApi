@@ -19,25 +19,13 @@ public class BookGenreService : IBookGenreService
 
     public async Task <BookGenre> GetBookGenreByIdAsync(int id)
     {
-        var bookGenre = await _context.BookGenres.FindAsync(id);
-        if (bookGenre == null)
-        {
-            throw new KeyNotFoundException($"BookGenre with ID {id} was not found.");
-        }
-        return bookGenre;
+        return await _context.BookGenres.FindAsync(id);
     }
 
     public async Task UpdateBookGenreAsync(int id, BookGenre bookGenre)
     {
-       var exBookGenre = await _context.BookGenres.FindAsync(id);
-       if(exBookGenre == null)
-       {
-        throw new KeyNotFoundException($"BookGenre with ID {id} was not found.");
-       }
-       exBookGenre.BookId = bookGenre.BookId;
-       exBookGenre.GenreId = bookGenre.GenreId;
-
-       await _context.SaveChangesAsync(); 
+       _context.Entry(bookGenre).State = EntityState.Modified;
+       await _context.SaveChangesAsync();
     }
 
     public async Task <BookGenre> AddBookGenreAsync(BookGenre bookGenre)
@@ -53,10 +41,9 @@ public class BookGenreService : IBookGenreService
         var bGenre = await _context.BookGenres.FindAsync(id);
         if (bGenre != null)
         {
-           throw new KeyNotFoundException($"BookGenre with ID {id} was not found.");
+            _context.BookGenres.Remove(bGenre);
+            await _context.SaveChangesAsync();
         }
-         _context.BookGenres.Remove(bGenre);
-
-        await _context.SaveChangesAsync();
+         
     }
 }

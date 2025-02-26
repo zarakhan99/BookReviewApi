@@ -43,6 +43,10 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
+builder.Services.AddScoped<IGenreService, GenreService>(); // registering the service - whenever Igenre is requested Genre service is provided as isntance 
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IBookGenreService, BookGenreService>();
 
 var app = builder.Build();
 

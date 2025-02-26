@@ -14,96 +14,147 @@ namespace BookReviewApi.Controllers
     [ApiController]
     public class GenresController : ControllerBase
     {
-        private readonly ApplicationContext _context;
+        private readonly IGenreService _genreService; // genre service interface 
+        private readonly ILogger<GenresController> _logger; //logger service 
 
-        public GenresController(ApplicationContext context)
+        public GenresController(IGenreService genreService, ILogger<GenresController> logger) // injecting the dependicies in the contructor  
         {
-            _context = context;
+            _genreService = genreService;
+            _logger = logger;
         }
 
         // GET: api/Genres
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Genre>>> GetGenres()
         {
-            return await _context.Genres.ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching all genres."); 
+                var genres = await _genreService.GetAllGenresAsync(); // call genre service to get retrive all genres
+                if (genres == null || !genres.Any()) // if no genres exist it logs a warning and returns message
+                {
+                    _logger.LogWarning("No genres found.");
+                    return NotFound("No genres found.");
+                }
+                return Ok(genres);
+            }
+            catch (Exception ex) // error handling logging a error if something goes wrong 
+            {
+                _logger.LogError(ex, "An error occurred while fetching genres."); //
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
+
         }
 
         // GET: api/Genres/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Genre>> GetGenre(int id)
         {
-            var genre = await _context.Genres.FindAsync(id);
-
-            if (genre == null)
+            try
             {
-                return NotFound();
-            }
+                _logger.LogInformation($"Fetching genre with ID {id}"); //starts the process 
+                var genre = await _genreService.GetGenreByIdAsync(id); // retrives genres that matches id
 
-            return genre;
+                if (genre == null) // if it comes up empty a warning is logged and not found reposnse is displayed
+                {
+                    _logger.LogWarning($"Genre with ID {id} not found.");
+                    return NotFound($"Genre with ID {id} not found.");
+                }
+
+                return Ok(genre); // otherwise returns genre 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching the genre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // only admins can update a genre 
         // PUT: api/Genres/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGenre(int id, Genre genre)
         {
-            if (id != genre.GenreId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(genre).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                if (id != genre.GenreId) // check if id matches 
+                {
+                    _logger.LogWarning("Genre ID mismatch."); // if id of the genre id doesnt match a warning and bad request is displayed 
+                    return BadRequest("Genre ID mismatch.");
+                }
+
+                await _genreService.UpdateGenreAsync(id, genre); // updates genre information
+                _logger.LogInformation($"Genre with ID {id} updated.");
+                return NoContent(); // returns no content as update was successful
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GenreExists(id))
+                if (await _genreService.GetGenreByIdAsync(id) == null) // if it comes up empty a warning is logged and retunrs not found
                 {
-                    return NotFound();
+                    _logger.LogWarning($"Genre with ID {id} not found for update.");
+                    return NotFound($"Genre with ID {id} not found."); 
                 }
                 else
                 {
-                    throw;
+                    _logger.LogError("Error updating Genre."); 
+                    throw; // throws the exception again
                 }
             }
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while updating the Genre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
-        [Authorize(Roles = "Admin")]
+
+        [Authorize(Roles = "Admin")] // only admins can create a genre 
         // POST: api/Genres
         [HttpPost]
         public async Task<ActionResult<Genre>> PostGenre(Genre genre)
         {
-            _context.Genres.Add(genre);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (genre == null) // if object provided is null bad request is returned 
+                {
+                    _logger.LogWarning("Received empty genre object.");
+                    return BadRequest("Genre data cannot be null.");
+                }
 
-            return CreatedAtAction("GetGenre", new { id = genre.GenreId }, genre);
+                await _genreService.AddGenreAsync(genre); // adds the genre to the database 
+                _logger.LogInformation($"Genre with ID {genre.GenreId} created.");
+                return CreatedAtAction("GetGenre", new { id = genre.GenreId }, genre);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating the genre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")] // only admins casn delete a genre 
         // DELETE: api/Genres/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGenre(int id)
         {
-            var genre = await _context.Genres.FindAsync(id);
-            if (genre == null)
+            try
             {
-                return NotFound();
+                var genre = await _genreService.GetGenreByIdAsync(id); // fecthded genre by id
+                if (genre == null)
+                {
+                    _logger.LogWarning($"Genre with ID {id} not found.");
+                    return NotFound($"Genre with ID {id} not found."); 
+                }
+
+                await _genreService.DeleteGenreAsync(id); // if found genre with the id is deleted from database 
+                _logger.LogInformation($"Genre with ID {id} deleted.");
+                return NoContent(); // returns no content as deletion was successful
             }
-
-            _context.Genres.Remove(genre);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool GenreExists(int id)
-        {
-            return _context.Genres.Any(e => e.GenreId == id);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the genre.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
     }
 }

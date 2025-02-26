@@ -19,13 +19,7 @@ public class GenreService : IGenreService
 
     public async Task<Genre> GetGenreByIdAsync(int id)
     {
-        var genre = await _context.Genres.FindAsync(id);
-         if (genre == null)
-        {
-            throw new KeyNotFoundException($"Genre with ID {id} was not found.");
-        }
-        return genre;
-
+        return await _context.Genres.FindAsync(id);
     }
 
     public async Task <Genre> AddGenreAsync(Genre genre)
@@ -37,38 +31,17 @@ public class GenreService : IGenreService
 
     public async Task UpdateGenreAsync(int id, Genre genre)
     {
-       var existingGenre = await _context.Genres.FindAsync(id);
-       if(existingGenre == null)
-       {
-         throw new KeyNotFoundException($"Genre with ID {id} was not found.");
-       }
-
-        if (id != genre.GenreId)
-    {
-        throw new ArgumentException("ID does not match Genre ID.");
-    }
-    // Update fields
-    existingGenre.GenreName = genre.GenreName;
-
-    try
-    {
+       _context.Entry(genre).State = EntityState.Modified;
         await _context.SaveChangesAsync();
     }
-    catch (DbUpdateConcurrencyException)
-    {
-        throw new Exception("Error updating Genre, possibly due to a concurrency conflict.");
-    }
-    }
-
     public async Task DeleteGenreAsync(int id)
     {
         var genre = await _context.Genres.FindAsync(id);
         if (genre != null)
         {
-            throw new KeyNotFoundException($"Genre with ID {id} was not found.");
+            _context.Genres.Remove(genre);
+            await _context.SaveChangesAsync();
         }
-        _context.Genres.Remove(genre);
         
-        await _context.SaveChangesAsync();
     }
 }

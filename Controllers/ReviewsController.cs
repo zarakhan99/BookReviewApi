@@ -15,46 +15,85 @@ namespace BookReviewApi.Controllers
     [ApiController]
     public class ReviewsController : ControllerBase
     {
-        private readonly ApplicationContext _context;
+        private readonly IReviewService _reviewService; // genre service interface 
+        private readonly ILogger<ReviewsController> _logger; //logger service 
 
-        public ReviewsController(ApplicationContext context)
+        public ReviewsController(IReviewService reviewService, ILogger<ReviewsController> logger)
         {
-            _context = context;
+            _reviewService = reviewService;
+            _logger = logger;
         }
 
         // GET: api/Reviews
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Review>>> GetReviews()
         {
-            return await _context.Reviews.ToListAsync();
+            try
+            {
+                _logger.LogInformation("Fetching all reviews."); 
+                var reviews = await _reviewService.GetAllReviewsAsync(); // calls review service to get retrive all reviews
+                if (reviews == null || !reviews.Any()) // if no reviews exist it logs a warning and returns message
+                {
+                    _logger.LogWarning("No reviews found.");
+                    return NotFound("No reviews found.");
+                }
+                return Ok(reviews);
+            }
+            catch (Exception ex) // error handling logging a error if something goes wrong 
+            {
+                _logger.LogError(ex, "An error occurred while fetching reviews."); 
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
+
         }
 
         // GET: api/Reviews/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Review>> GetReview(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-
-            if (review == null)
+            try
             {
-                return NotFound();
-            }
+                _logger.LogInformation($"Fetching review with ID {id}"); //starts the process 
+                var review = await _reviewService.GetReviewByIdAsync(id); // retrives genres that matches id
 
-            return review;
+                if (review == null) // if it comes up empty a warning is logged and not found reposnse is displayed
+                {
+                    _logger.LogWarning($"Review with ID {id} not found.");
+                    return NotFound($"Review with ID {id} not found.");
+                }
+
+                return Ok(review); // otherwise returns genre 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching the review.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
 
         [HttpGet("ByBook/{bookId}")]
         public async Task<ActionResult<Book>> GetReviewsForBook(int bookId)
         {
-            var reviews = await _context.Reviews
-            .Where(r => r.BookId == bookId) //checks if reviews are associated with a specific book id
-            .ToListAsync();
-            
-            if (reviews.Count == 0) // if no reviews are found then a not found error is returned 
+            try
             {
-                return NotFound();
+                _logger.LogInformation("Fetching all reviews."); 
+                var reviews = await _reviewService.GetReviewsForBookAsync(bookId);
+
+                if (reviews ==null || reviews.Any()) // if no reviews are found then a not found error is returned 
+                {
+                     _logger.LogWarning($"Reviews for book ID {bookId} not found.");
+                    return NotFound($"Review for book ID with {bookId} not found.");
+                }
+                return Ok(reviews); 
+
             }
-            return Ok(reviews); 
+            catch (Exception ex)
+            {
+                // Log any exceptions that occur during the process
+                _logger.LogError(ex, "An error occurred while fetching reviews for the book.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
+            
         }
 
         [Authorize]
@@ -62,44 +101,50 @@ namespace BookReviewApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReview(int id, Review review)
         {
-            if (id != review.ReviewId)
+           if (id != review.ReviewId)
             {
-                return BadRequest();
+                _logger.LogWarning("Review ID mismatch.");
+                return BadRequest("Review ID mismatch."); 
             }
-
              var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
              var admin = User.IsInRole("Admin");
              var owner = review.MemberId == appUser;
 
-             if(appUser == null)
-             {
-                return Unauthorized();
-             }
+            if (appUser == null)
+            {
+                _logger.LogWarning("User is not authenticated.");
+                return Unauthorized("User is not authenticated.");
+            }
 
-             if (!admin && !owner)
-             {
-                return Forbid(); 
-             }
-
-            _context.Entry(review).State = EntityState.Modified;
-
+            if (!admin && !owner)
+            {
+                 _logger.LogWarning($"User with ID {appUser} does not have permission to update review with ID {id}.");
+                 return Forbid(); // Forbidden access for non-admins and non-owners
+            }
+            
+            var exReview = await _reviewService.GetReviewByIdAsync(id);
+            
+            if (exReview == null)
+            {
+                _logger.LogWarning($"Review with ID {id} not found for update.");
+                return NotFound($"Review with ID {id} not found.");
+            }
+            
+            exReview.Rating = review.Rating;
+            exReview.ReviewComment = review.ReviewComment;
+            exReview.ReviewDate = DateTime.UtcNow; 
+            
             try
             {
-                await _context.SaveChangesAsync();
+                await _reviewService.UpdateReviewAsync(id, exReview);
+                _logger.LogInformation($"Review with ID {id} updated.");
+                return NoContent();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ReviewExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                _logger.LogError($"An error occurred while updating the review.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating review.");
             }
-
-            return NoContent();
         }
 
         [Authorize]
@@ -107,48 +152,66 @@ namespace BookReviewApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Review>> PostReview(Review review)
         {
-            review.ReviewDate = DateTime.UtcNow; //Ensures the date and time are automatically created with a universal time  
-            _context.Reviews.Add(review);
-            await _context.SaveChangesAsync();
+            try
+            {
+                if (review == null) // if object provided is null bad request is returned 
+                {
+                    _logger.LogWarning("Received empty review object.");
+                    return BadRequest("Review data cannot be null.");
+                }
 
-            return CreatedAtAction("GetReview", new { id = review.ReviewId }, review);
+                review.ReviewDate = DateTime.UtcNow;
+
+                await _reviewService.AddReviewAsync(review); // adds the genre to the database 
+                _logger.LogInformation($"Review with ID {review.ReviewId} created.");
+                return CreatedAtAction("GetReview", new { id = review.ReviewId }, review);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while creating the review.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
-        
         
         [Authorize]
          // DELETE: api/Reviews/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
         {
-            var review = await _context.Reviews.FindAsync(id);
-            if (review == null)
+            try
             {
-                return NotFound();
+                var review = await _reviewService.GetReviewByIdAsync(id); // fetch review by id
+                if (review == null)
+                {
+                    _logger.LogWarning($"Review with ID {id} not found.");
+                    return NotFound($"Review with ID {id} not found."); 
+                }
+                
+                var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var admin = User.IsInRole("Admin");
+                var owner = review.MemberId == appUser;
+
+            if (appUser == null)
+            {
+                _logger.LogWarning("User is not authenticated.");
+                return Unauthorized("User is not authenticated.");
             }
 
-             var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-             var admin = User.IsInRole("Admin");
-             var owner = review.MemberId == appUser;
+            if (!admin && !owner)
+            {
+                 _logger.LogWarning($"User with ID {appUser} does not have permission to delete review with ID {id}.");
+                 return Forbid(); // Forbidden access for non-admins and non-owners
+            }
 
-             if(appUser == null)
-             {
-                return Unauthorized();
-             }
-
-             if (!admin && !owner)
-             {
-                return Forbid(); 
-             }
-
-            _context.Reviews.Remove(review);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool ReviewExists(int id)
-        {
-            return _context.Reviews.Any(e => e.ReviewId == id);
+                await _reviewService.DeleteReviewAsync(id); // if found, review with the id is deleted from database 
+                _logger.LogInformation($"Review with ID {id} deleted.");
+                return NoContent(); // returns no content as deletion was successful
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while deleting the review.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
         }
     }
 }

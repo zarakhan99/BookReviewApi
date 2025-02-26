@@ -48,9 +48,9 @@ public class ReviewService : IReviewService
         var review = await _context.Genres.FindAsync(id);
         if (review != null)
         {
-            throw new KeyNotFoundException($"Review with ID {id} was not found.");
+            _context.Genres.Remove(review);
+            await _context.SaveChangesAsync();
         }
-        _context.Genres.Remove(review);
-        await _context.SaveChangesAsync();
+       
     }
 }
