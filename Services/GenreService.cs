@@ -22,11 +22,10 @@ public class GenreService : IGenreService
         return await _context.Genres.FindAsync(id);
     }
 
-    public async Task <Genre> AddGenreAsync(Genre genre)
+    public async Task AddGenreAsync(Genre genre)
     {
         _context.Genres.Add(genre);
         await _context.SaveChangesAsync();
-        return genre;
     }
 
     public async Task UpdateGenreAsync(int id, Genre genre)

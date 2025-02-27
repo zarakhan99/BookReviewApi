@@ -28,12 +28,10 @@ public class BookGenreService : IBookGenreService
        await _context.SaveChangesAsync();
     }
 
-    public async Task <BookGenre> AddBookGenreAsync(BookGenre bookGenre)
+    public async Task AddBookGenreAsync(BookGenre bookGenre)
     {
         _context.BookGenres.Add(bookGenre);
         await _context.SaveChangesAsync();
-        
-        return bookGenre;
     }
 
     public async Task DeleteBookGenreAsync(int id)

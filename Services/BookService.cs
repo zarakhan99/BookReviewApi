@@ -32,11 +32,10 @@ public class BookService : IBookService
         return books;
     }
 
-    public async Task <Book> AddBookAsync(Book book)
+    public async Task AddBookAsync(Book book)
     {
         _context.Books.Add(book);
         await _context.SaveChangesAsync();
-        return book;
     }
 
     public async Task UpdateBookAsync(int id, Book book)

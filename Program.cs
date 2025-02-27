@@ -9,20 +9,20 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddControllers();
-builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Connection")));
+builder.Services.AddControllers();// registering controllers for API end points 
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddDbContext<ApplicationContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("Connection"))); // registers db context to use SQL Lite 
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>() // registering identify framwork for user authentication,roles and JWT tokens.
     .AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings")); // registering email 
 builder.Services.AddScoped<EmailService>();
 
-builder.Services.AddScoped<RolesController>();
+builder.Services.AddScoped<RolesController>(); // adding roles controller class to be able to do roles management  
 
 builder.Services.AddAuthentication(options =>
 {
@@ -43,7 +43,7 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-builder.Services.AddScoped<IGenreService, GenreService>(); // registering the service - whenever Igenre is requested Genre service is provided as isntance 
+builder.Services.AddScoped<IGenreService, GenreService>(); // registering the services - whenever Igenre is requested Genre service is provided as isntance 
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IBookGenreService, BookGenreService>();

@@ -30,11 +30,10 @@ public class ReviewService : IReviewService
 
     }
 
-    public async Task <Review> AddReviewAsync(Review review)
+    public async Task AddReviewAsync(Review review)
     {
         _context.Reviews.Add(review);
         await _context.SaveChangesAsync();
-        return review;
     }
 
     public async Task UpdateReviewAsync(int id, Review review)
@@ -45,10 +44,10 @@ public class ReviewService : IReviewService
 
     public async Task DeleteReviewAsync(int id)
     {
-        var review = await _context.Genres.FindAsync(id);
+        var review = await _context.Reviews.FindAsync(id);
         if (review != null)
         {
-            _context.Genres.Remove(review);
+            _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
         }
        

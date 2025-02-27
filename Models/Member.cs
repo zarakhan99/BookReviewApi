@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace BookReviewApi.Models
 {
-    public class Member : IdentityUser
+    public class Member : IdentityUser //inherits identity user to provide built in properties
     {
 
         [JsonIgnore]

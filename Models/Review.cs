@@ -24,7 +24,7 @@ namespace BookReviewApi.Models
         public DateTime ReviewDate { get; set; } 
 
         [JsonIgnore]
-        public Member? Member { get; set; }  // navigational properties
+        public Member? Member { get; set; }  // navigational properties 
 
         [JsonIgnore]
         public Book? Book { get; set; }  
