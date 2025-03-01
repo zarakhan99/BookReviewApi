@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using BookReviewApi.Models;
 
-namespace BookReviewApi.Models
+namespace BookReviewApi.Context
 {
 public class ApplicationContext : IdentityDbContext<IdentityUser> //providing built in tables to mange user, roles and authentication
     {

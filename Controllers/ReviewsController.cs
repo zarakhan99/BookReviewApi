@@ -79,7 +79,7 @@ namespace BookReviewApi.Controllers
                 _logger.LogInformation("Fetching all reviews."); 
                 var reviews = await _reviewService.GetReviewsForBookAsync(bookId);
 
-                if (reviews ==null || reviews.Any()) // if no reviews are found then a not found error is returned 
+                if (reviews ==null || !reviews.Any()) // if no reviews are found then a not found error is returned 
                 {
                      _logger.LogWarning($"Reviews for book ID {bookId} not found.");
                     return NotFound($"Review for book ID with {bookId} not found.");
@@ -96,7 +96,7 @@ namespace BookReviewApi.Controllers
             
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         // PUT: api/Reviews/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReview(int id, Review review)
@@ -105,21 +105,6 @@ namespace BookReviewApi.Controllers
             {
                 _logger.LogWarning("Review ID mismatch.");
                 return BadRequest("Review ID mismatch."); 
-            }
-             var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-             var admin = User.IsInRole("Admin");
-             var owner = review.MemberId == appUser;
-
-            if (appUser == null)
-            {
-                _logger.LogWarning("User is not authenticated.");
-                return Unauthorized("User is not authenticated.");
-            }
-
-            if (!admin && !owner)
-            {
-                 _logger.LogWarning($"User with ID {appUser} does not have permission to update review with ID {id}.");
-                 return Forbid(); // Forbidden access for non-admins and non-owners
             }
             
             var exReview = await _reviewService.GetReviewByIdAsync(id);
@@ -173,7 +158,7 @@ namespace BookReviewApi.Controllers
             }
         }
         
-        [Authorize]
+        [Authorize(Roles = "Admin")]
          // DELETE: api/Reviews/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReview(int id)
@@ -186,22 +171,6 @@ namespace BookReviewApi.Controllers
                     _logger.LogWarning($"Review with ID {id} not found.");
                     return NotFound($"Review with ID {id} not found."); 
                 }
-                
-                var appUser = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                var admin = User.IsInRole("Admin");
-                var owner = review.MemberId == appUser;
-
-            if (appUser == null)
-            {
-                _logger.LogWarning("User is not authenticated.");
-                return Unauthorized("User is not authenticated.");
-            }
-
-            if (!admin && !owner)
-            {
-                 _logger.LogWarning($"User with ID {appUser} does not have permission to delete review with ID {id}.");
-                 return Forbid(); // Forbidden access for non-admins and non-owners
-            }
 
                 await _reviewService.DeleteReviewAsync(id); // if found, review with the id is deleted from database 
                 _logger.LogInformation($"Review with ID {id} deleted.");

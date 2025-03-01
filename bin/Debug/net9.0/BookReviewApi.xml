@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BookReviewApi</name>
+    </assembly>
+    <members>
+        <member name="T:BookReviewApi.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookReviewApi.Migrations.IdentityAdded">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.IdentityAdded.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.IdentityAdded.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.IdentityAdded.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookReviewApi.Migrations.ModelsUpdated">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.ModelsUpdated.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.ModelsUpdated.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.ModelsUpdated.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookReviewApi.Migrations.UpdatedMigrations">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.UpdatedMigrations.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.UpdatedMigrations.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.UpdatedMigrations.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookReviewApi.Migrations.MemberUpdate">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberUpdate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberUpdate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberUpdate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:BookReviewApi.Migrations.MemberNotNull">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberNotNull.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberNotNull.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:BookReviewApi.Migrations.MemberNotNull.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

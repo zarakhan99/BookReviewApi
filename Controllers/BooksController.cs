@@ -79,7 +79,7 @@ namespace BookReviewApi.Controllers
                 _logger.LogInformation("Fetching all books."); 
                 var books = await _bookService.GetBookByGenreAsync(genreId);
 
-                if (books.Any()) // if no reviews are found then a not found error is returned 
+                if (books == null || !books.Any()) // if no books are found then a not found error is returned 
                 {
                      _logger.LogWarning($"Books with genre ID {genreId} not found.");
                     return NotFound($"Books for genre ID with {genreId} not found.");
@@ -140,13 +140,13 @@ namespace BookReviewApi.Controllers
             {
                 if (book == null) // if object provided is null bad request is returned 
                 {
-                    _logger.LogWarning("Received empty genre object.");
-                    return BadRequest("Genre data cannot be null.");
+                    _logger.LogWarning("Received empty book object.");
+                    return BadRequest("Book data cannot be null.");
                 }
 
                 await _bookService.AddBookAsync(book); // adds the genre to the database 
-                _logger.LogInformation($"Genre with ID {book.BookId} created.");
-                return CreatedAtAction("GetGenre", new { id = book.BookId }, book);
+                _logger.LogInformation($"Book with ID {book.BookId} created.");
+                return CreatedAtAction("GetBook", new { id = book.BookId }, book);
             }
             catch (Exception ex)
             {
