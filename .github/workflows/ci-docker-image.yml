@@ -36,3 +36,4 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/bookreviewapi:latest
+          working-directory: .  # Make sure Docker is running in the root directory
