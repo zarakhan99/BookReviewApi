@@ -1,33 +1,37 @@
-using Microsoft.EntityFrameworkCore; 
-using BookReviewApi.Models;
+using Microsoft.EntityFrameworkCore; //Entity framwork for database access 
+using BookReviewApi.Models; 
 using BookReviewApi.Context;
-using Microsoft.AspNetCore.Identity; 
+using Microsoft.AspNetCore.Identity; // Identity frame work for user management and authentication
 using BookReviewApi.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddOpenApi();
 
-builder.Services.AddControllers();// registering controllers for API end points 
+builder.Services.AddOpenApi(); // Open API for swagger documentation
 
+builder.Services.AddControllers();// Registering controllers for API end points 
+
+// Registers db context to use SQL Lite for EF to be able to interact with the databse - 
 builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("Connection"))); // registers db context to use SQL Lite 
+    options.UseSqlite(builder.Configuration.GetConnectionString("Connection"))); 
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>() // registering identify framwork for user authentication,roles and JWT tokens.
-    .AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders();
+// Registering identify framework for user authentication,roles and JWT tokens.
+builder.Services.AddIdentity<IdentityUser, IdentityRole>() // EF stores user information
+    .AddEntityFrameworkStores<ApplicationContext>().AddDefaultTokenProviders(); // Genration tokens for 
 
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings")); // registering email 
-builder.Services.AddScoped<EmailService>();
+// Registering email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings")); 
+builder.Services.AddScoped<EmailService>(); // Email service used as a dependency 
 
-builder.Services.AddScoped<RolesController>(); // adding roles controller class to be able to do roles management  
+builder.Services.AddScoped<RolesController>(); // Registering roles controller for do roles management as a dependency injection 
 
+//Registering jwt authenticiation - ensure suers are authenticated befoe accessing 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -38,19 +42,24 @@ builder.Services.AddAuthentication(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            ValidateIssuer = true, // Token is from a valid user 
+            ValidateAudience = true, // Token is from a valid user 
+            ValidateLifetime = true, // Making sure token is not expired 
+            ValidateIssuerSigningKey = true, // Making sure token has a valid signing key
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], // Validate issuer 
+            ValidAudience = builder.Configuration["Jwt:Issuer"], 
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])) //using secret key from appsettings.json to validate token
         };
     });
-builder.Services.AddScoped<IGenreService, GenreService>(); // registering the services - whenever Igenre is requested Genre service is provided as isntance 
+
+//Registering services - dependency injections 
+//Inject services whenever interfaces are required 
+builder.Services.AddScoped<IGenreService, GenreService>(); 
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IBookGenreService, BookGenreService>();
+
+//Swagger configuration 
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -73,12 +82,14 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
+//Include XML Documentation
+
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 
-var app = builder.Build();
+var app = builder.Build(); // Build the application
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -93,9 +104,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapControllers();
-app.UseAuthentication();
+app.MapControllers(); //map api endpoints controllers
+app.UseAuthentication(); 
 app.UseAuthorization();
 
-app.Run();
+app.Run(); // Start application
 

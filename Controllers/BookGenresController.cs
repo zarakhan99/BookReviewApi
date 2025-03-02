@@ -15,10 +15,11 @@ namespace BookReviewApi.Controllers
     [Authorize(Roles = "Admin")]
     public class BookGenresController : ControllerBase
     {
-        private readonly IBookGenreService _bookGenreService; // genre service interface 
-        private readonly ILogger<BookGenresController> _logger; //logger service 
+        private readonly IBookGenreService _bookGenreService; // Book service interface 
+        private readonly ILogger<BookGenresController> _logger; //Logger service 
 
-        public BookGenresController(IBookGenreService bookGenreService, ILogger<BookGenresController> logger)
+        // Injecting the dependicies in the contructor
+        public BookGenresController(IBookGenreService bookGenreService, ILogger<BookGenresController> logger) 
         {
             _bookGenreService = bookGenreService;
             _logger = logger;
@@ -30,16 +31,17 @@ namespace BookReviewApi.Controllers
         {
             try
             {
-                _logger.LogInformation("Fetching all books."); 
-                var bookGenres = await _bookGenreService.GetBookGenresAsync(); // calls review service to get retrive all reviews
-                if (bookGenres == null || !bookGenres.Any()) // if no reviews exist it logs a warning and returns message
+                _logger.LogInformation("Fetching all books."); //Logging the start of the operation
+                var bookGenres = await _bookGenreService.GetBookGenresAsync(); // Calls service to retrieve all bookgenres
+                if (bookGenres == null || !bookGenres.Any()) // If no bookgenres exist it logs a warning and returns not found message
                 {
                     _logger.LogWarning("No bookgenres found.");
                     return NotFound("No bookgenres found.");
                 }
-                return Ok(bookGenres);
+                return Ok(bookGenres); // Returns a list of bookgenres
+
             }
-            catch (Exception ex) // error handling logging a error if something goes wrong 
+            catch (Exception ex) // Log any exceptions that occur during the process and returns 500 internal error status code 
             {
                 _logger.LogError(ex, "An error occurred while fetching book genres."); 
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
@@ -52,18 +54,18 @@ namespace BookReviewApi.Controllers
         {
             try
             {
-                _logger.LogInformation($"Fetching BookGenre with ID {id}"); //starts the process 
-                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // retrives genres that matches id
+                _logger.LogInformation($"Fetching BookGenre with ID {id}"); // Logging the start of the operation
+                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // Calls service and  bookgenres by id
 
-                if (bookGenre == null) // if it comes up empty a warning is logged and not found reposnse is displayed
+                if (bookGenre == null) // If it is null a warning is logged and not found reposnse is returned
                 {
                     _logger.LogWarning($"Book genre with ID {id} not found.");
                     return NotFound($"Book genre not found.");
                 }
 
-                return Ok(bookGenre); // otherwise returns genre 
+                return Ok(bookGenre); // Returns a list of bookgenres 
             }
-            catch (Exception ex)
+            catch (Exception ex) // Log any exceptions that occur during the process and returns 500 internal error status code 
             {
                 _logger.LogError(ex, "An error occurred while fetching the bookgenre.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
@@ -76,25 +78,25 @@ namespace BookReviewApi.Controllers
         {
             try
             {
-                if (bookGenre == null)
+                if (bookGenre == null) // If bookGenre object is null, log a warning and bad request is returned
                 {
                     _logger.LogWarning("Received empty BookGenre object.");
                     return BadRequest("BookGenre data cannot be null.");
                 }
 
-                if (id != bookGenre.BookGenreId) // checks if id matches 
+                if (id != bookGenre.BookGenreId) // Check if id matches matched URL
                 {
-                    _logger.LogWarning("BookGenere ID mismatch."); // if id of the book id doesnt match a warning and bad request is displayed 
+                    _logger.LogWarning("BookGenere ID mismatch."); //A warning and bad request is returned is it doesnt match
                     return BadRequest("BookGenre ID mismatch.");
                 }
 
-                await _bookGenreService.UpdateBookGenreAsync(id, bookGenre); // updates book information
+                await _bookGenreService.UpdateBookGenreAsync(id, bookGenre); // Calls service and updates bookgenre in databse
                 _logger.LogInformation($"BookGenre with ID {id} updated.");
-                return NoContent(); // returns no content as update was successful
+                return NoContent(); // Returns no content as update was successful
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException) // Exception to log errors and return status code if problem updating the database
             {
-                if (await _bookGenreService.GetBookGenreByIdAsync(id) == null) // if it comes up empty a warning is logged and retunrs not found
+                if (await _bookGenreService.GetBookGenreByIdAsync(id) == null) // If bookgenre doesn't exist anymore, warning is logged and vbad request returned 
                 {
                     _logger.LogWarning($"BookGenre with ID {id} not found for update.");
                     return NotFound($"BookGenre with ID {id} not found."); 
@@ -102,10 +104,10 @@ namespace BookReviewApi.Controllers
                 else
                 {
                     _logger.LogError("Error updating bookgenre."); 
-                    throw; // throws the exception again
+                    throw; // Throws the exception again
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) // Log any exceptions that occur during the process and returns 500 internal error status code 
             {
                 _logger.LogError(ex, "An error occurred while updating the bookgenre.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
@@ -118,17 +120,17 @@ namespace BookReviewApi.Controllers
         {
             try
             {
-                if (bookGenre == null) // if object provided is null bad request is returned 
+                if (bookGenre == null) // if object provided is null, warning is logged bad request is returned 
                 {
                     _logger.LogWarning("Received empty BookGenre object.");
                     return BadRequest("BookGenre data cannot be null.");
                 }
 
-                await _bookGenreService.AddBookGenreAsync(bookGenre); // adds the genre to the database 
+                await _bookGenreService.AddBookGenreAsync(bookGenre); // Calls service and adds the bookgenre to the database 
                 _logger.LogInformation($"BookGenre with ID {bookGenre.BookGenreId} created.");
-                return CreatedAtAction("GetBookGenre", new { id = bookGenre.BookGenreId }, bookGenre);
+                return CreatedAtAction("GetBookGenre", new { id = bookGenre.BookGenreId }, bookGenre); //Returns a 201 creation response with the location
             }
-            catch (Exception ex)
+            catch (Exception ex) // Log any exceptions that occur during the process and returns 500 internal error status code 
             {
                 _logger.LogError(ex, "An error occurred while creating the genre.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
@@ -141,18 +143,18 @@ namespace BookReviewApi.Controllers
         {
             try
             {
-                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // fecthded genre by id
-                if (bookGenre == null)
+                var bookGenre = await _bookGenreService.GetBookGenreByIdAsync(id); // Callsd service and fetches bookgenre by id
+                if (bookGenre == null) // if bookgenre not found, logs a warning ad returns not found response
                 {
                     _logger.LogWarning($"BookGenre with ID {id} not found.");
                     return NotFound($"BookGenre with ID {id} not found."); 
                 }
 
-                await _bookGenreService.DeleteBookGenreAsync(id); // if found genre with the id is deleted from database 
+                await _bookGenreService.DeleteBookGenreAsync(id); // Calls service and bookgenre with id is deleted from database 
                 _logger.LogInformation($"BookGenre with ID {id} deleted.");
-                return NoContent(); // returns no content as deletion was successful
+                return NoContent(); // Returns no content as deletion was successful
             }
-            catch (Exception ex)
+            catch (Exception ex) // Log any exceptions that occur during the process and returns 500 internal error status code 
             {
                 _logger.LogError(ex, "An error occurred while deleting the BookGenre.");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
