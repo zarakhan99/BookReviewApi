@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore; //Entity framwork for database access 
 using BookReviewApi.Models; 
+using BookReviewApi.Services;
 using BookReviewApi.Context;
 using Microsoft.AspNetCore.Identity; // Identity frame work for user management and authentication
 using BookReviewApi.Controllers;

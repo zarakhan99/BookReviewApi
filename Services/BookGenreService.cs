@@ -4,46 +4,54 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-//BookGenre interface is reposnsible for the Crud operations  perfomed on bookgenre 
-public class BookGenreService : IBookGenreService // Inherits from interface which provides methods 
+namespace BookReviewApi.Services
 {
-    private readonly ApplicationContext _context; // Aplication context to interacdt with the bookgenre table
-
-    public BookGenreService(ApplicationContext context) //Contructor to inject depenendency and initialise database context
+    // BookGenreService is responsible for performing CRUD operations on BookGenre
+    public class BookGenreService : IBookGenreService
     {
-        _context = context;
-    }
+        private readonly ApplicationContext _context; // Application context to interact with the BookGenre table
 
-    public async Task<IEnumerable<BookGenre>> GetBookGenresAsync()
-    {
-        return await _context.BookGenres.ToListAsync(); // Retrieves list of bookgenres 
-    }
-
-    public async Task <BookGenre> GetBookGenreByIdAsync(int id) // Finds bookgenre with the same id in database 
-    {
-        return await _context.BookGenres.FindAsync(id); // If not found null is returned 
-    }
-
-    public async Task UpdateBookGenreAsync(int id, BookGenre bookGenre) // Updates bookgenre entity
-    {
-       _context.Entry(bookGenre).State = EntityState.Modified; // Bookgenre entity is modified
-       await _context.SaveChangesAsync(); // Any changes are saved in the database 
-    }
-
-    public async Task AddBookGenreAsync(BookGenre bookGenre) // Adds a book genre to the database 
-    {
-        _context.BookGenres.Add(bookGenre); 
-        await _context.SaveChangesAsync(); // Any changes are saved in the database 
-    }
-
-    public async Task DeleteBookGenreAsync(int id) // Deletes a book genre entity with matching id 
-    {
-        var bGenre = await _context.BookGenres.FindAsync(id); // Finds bookgenre with the same id in database 
-        if (bGenre != null) // If bookgenre with id found 
+        // Constructor to inject dependency and initialize the database context
+        public BookGenreService(ApplicationContext context)
         {
-            _context.BookGenres.Remove(bGenre); // Removed and changes are saved 
-            await _context.SaveChangesAsync();
+            _context = context;
         }
-         
+
+        // Retrieves the list of book genres from the database
+        public async Task<IEnumerable<BookGenre>> GetBookGenresAsync()
+        {
+            return await _context.BookGenres.ToListAsync();
+        }
+
+        // Finds a book genre by ID from the database
+        public async Task<BookGenre> GetBookGenreByIdAsync(int id)
+        {
+            return await _context.BookGenres.FindAsync(id); // If not found, null is returned
+        }
+
+        // Updates the BookGenre entity in the database
+        public async Task UpdateBookGenreAsync(int id, BookGenre bookGenre)
+        {
+            _context.Entry(bookGenre).State = EntityState.Modified; // BookGenre entity is modified
+            await _context.SaveChangesAsync(); // Changes are saved to the database
+        }
+
+        // Adds a new BookGenre to the database
+        public async Task AddBookGenreAsync(BookGenre bookGenre)
+        {
+            _context.BookGenres.Add(bookGenre);
+            await _context.SaveChangesAsync(); // Changes are saved to the database
+        }
+
+        // Deletes a BookGenre entity by ID from the database
+        public async Task DeleteBookGenreAsync(int id)
+        {
+            var bGenre = await _context.BookGenres.FindAsync(id); // Finds the BookGenre with the given ID
+            if (bGenre != null) // If found, remove it
+            {
+                _context.BookGenres.Remove(bGenre); // BookGenre is removed from the context
+                await _context.SaveChangesAsync(); // Changes are saved to the database
+            }
+        }
     }
 }
